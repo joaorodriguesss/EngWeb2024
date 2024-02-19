@@ -1,51 +1,79 @@
 import json
+import xmltodict
+import urllib.parse
 import os
+import xml.etree.ElementTree as ET
 
-html = '''
+preHTML = """
 <!DOCTYPE html>
-<html>
-<head> 
-    <title>EngWeb2024</title>
-    <meta charset = "UTF-8">
-</head>
-<body>
-'''
+<html lang="en">
 
-template = html
+    <head>
+        <title>Ruas de Braga</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1" >
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    </head>
 
-file = open("C:/Users/35193/Documents/GitHub/EngWeb2024/TPC1/mapa.json", "r", encoding="utf-8").read()
-os.mkdir("html")
+    <body>
 
-content = json.loads(file)
+        <div class="w3-card-4">
 
-html += "<ul>"
+            <header class="w3-container w3-black">
+                <h3>Ruas de Braga</h3>
+            </header>
 
-listaCidades = []
-for elem in content ["cidades"]:
-    listaCidades.append(elem['nome'])
+            <div class="w3-container">
+                <ul class="w3-ul w3-card-4" style="width:50%">
+"""
 
-    templateCidade = template
-    templateCidade += f"<h1>{elem['nome']}</h1>"
-    templateCidade += f"<h3>{elem['distrito']}</h3>"
-    templateCidade += f"<p><b>População:</b>{elem['população']}</p>"
-    templateCidade += f"<p><b>Descrição:</b>{elem['descrição']}</p>"
-    # templateCidade += f"<h6><a href="">Voltar</a></h6>"
-    templateCidade += "</body>"
-    templateCidade += "</html>"
+posHTML = """
+                </ul>
+            </div>
 
-    fileCidade = open(f"html/{elem['nome']}.html","w", encoding="utf-8")
-    fileCidade.write(templateCidade)
-    fileCidade.close() 
+            <footer class="w3-container w3-black">
+                <h5>Feito por A100711</h5>
+            </footer>
 
-   
-for elem in sorted(listaCidades):
-    html += "<li><a href="f"html/{elem['nome']}.html"">{elem}<a/></li>"
+        </div>
 
-html += "</ul>"
+    </body>
 
-html += "</body>"
-html += "</html>"
+</html>
+"""
 
-file = open("mapa_sorted.html","w", encoding="utf-8")
-file.write(html)
-file.close()
+os.chdir("C:/Users/35193/Documents/GitHub/EngWeb2024/TPC1")
+
+streets = []
+xmlDirectory = './MapaRuas/texto'
+content = ""
+for filename in os.listdir(xmlDirectory):
+    if filename.endswith('.xml'):
+        file_path = os.path.join(xmlDirectory, filename)
+        
+        tree = ET.parse(file_path)
+        root = tree.getroot()
+        
+        street_number = root.find('.//meta/número').text
+        street_name = root.find('.//meta/nome').text
+        
+        streets.append((int(street_number), street_name, filename))
+
+for i, street in enumerate(streets):
+    if street[1][0] == ' ':
+        street_list = list(street)
+        street_list[1] = street_list[1][1:]
+        streets[i] = tuple(street_list)
+
+streets_sorted = sorted(streets, key=lambda x: x[1])
+
+for street_number, street_name, filename in streets_sorted:
+    street_name_url = urllib.parse.quote(street_name.strip().replace(' ', '-'))
+    list_item = f'<li><a href="{street_number}-{street_name_url}.html">{street_name}</a></li>\n'
+    content += list_item
+    
+pageHTML = preHTML + content + posHTML
+
+f = open('./ruasSite/index.html', 'w', encoding='utf-8')
+f.write(pageHTML)
+f.close()
