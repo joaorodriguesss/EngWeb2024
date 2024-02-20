@@ -1,0 +1,14 @@
+json-server --watch db.json
+
+localhost:3000
+
+localhost:3000/lista
+localhost:3000/lista/1
+localhost:3000/lista?_sort=nome
+
+
+meter em modo para criar servidor:
+Set-ExecutionPolicy RemoteSigned
+
+meter em modo normal(restrito):
+Set-ExecutionPolicy Restricted
