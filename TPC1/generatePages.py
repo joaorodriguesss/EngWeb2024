@@ -89,4 +89,3 @@ for filename in os.listdir(xmlDirectory):
         
         with open(output_file_path, 'w', encoding='utf-8') as f:
             f.write(full_html)
-
