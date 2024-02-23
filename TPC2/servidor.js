@@ -1,58 +1,46 @@
-var http = require("http")
-var url = require("url")
-var axios = require("axios")
+var http = require('http');
+var url = require('url');
+var fs = require('fs');
 
 http.createServer(function(req, res) {
+    var q = url.parse(req.url, true).pathname.slice(1)
 
-    console.log(req.method + " " + req.url);
-
-    var q = url.parse(req.url, true)
-
-    res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
-
-    if (q.pathname == "/cidades"){
-        axios.get("http://localhost:3000/cidades?_sort=nome")
-        .then((resp) => {
-            var data = resp.data
-
-            res.write("<ul>")
-            for(i in data){
-                res.write("<li><a href='/cidades/" + data[i].id + "'>" + data[i].nome + "</a></li>")
+    if (q === '') {
+        serveFile('cidadesSite/index.html', 'text/html; charset=utf-8', res)
+    } else if (q === 'w3.css') {
+        serveFile('w3.css', 'text/css; charset=utf-8', res);
+    } else {
+        fs.readFile('mapa-virtual.json', function(err, data) {
+            if (err) {
+                sendError(res);
+            } else {
+                var ids = JSON.parse(data).cidades.map(cidade => cidade.id)
+                if (ids.includes(q)) {
+                    serveFile('cidadesSite/' + q + '.html', 'text/html; charset=utf-8', res)
+                } else {
+                    res.writeHead(200, {'Content-Type': 'text/plain'});
+                    res.write("Error 404");
+                    res.end()
+                }
             }
-            res.write("</ul>")
-            res.end()
-        })
-        .catch((erro) => {
-            console.log("Erro: " + erro);
-            res.write("<p>" + erro + "</p>")
-        })
-    }else if (req.url.match (/\/cidades\/c|d+/)){
-        let id = req.url.substring(9)
-        axios.get("http://localhost:3000/cidades/" + id)
-        .then((resp) => {
-            var data = resp.data
-
-            res.write("<h1>" + data.nome + "</h1>")
-            res.write("<h3>" + data.distrito + "</h3>")
-            res.write("<b> Populacão: </b>" + data["população"])
-            res.write("<br>")
-            res.write(data["descrição"])
-            res.write("<h6><a href ='/cidades'>Voltar</a></h6>")
-
-            res.end()
-        })
-        .catch((erro) => {
-            console.log("Erro: " + erro);
-            res.write("<p>" + erro + "</p>")
-        })
-        res.end()
+        });
     }
-    else{
-        res.write("Operação não suportada")
-        res.end()
-    }
-    res.end(); 
+}).listen(7777);
 
-}).listen(7777, function() {
-    console.log('Servidor aberto na porta 7777');
-});
+function serveFile(filePath, contentType, res) {
+    fs.readFile(filePath, function(err, data) {
+        if (err) {
+            sendError(res);
+        } else {
+            res.writeHead(200, {'Content-Type': contentType});
+            res.write(data);
+            res.end();
+        }
+    });
+}
+
+function sendError(res) {
+    res.writeHead(500, {'Content-Type': 'text/plain'});
+    res.write('Error reading file');
+    res.end();
+}

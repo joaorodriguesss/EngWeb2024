@@ -17,7 +17,7 @@ preHTML = """
             <header class="w3-container w3-black">
                 <h3>{cidade_nome}</h3>
                 <address>
-                <a href="index.html">Voltar à página principal</a>
+                <a href="/">Voltar à página principal</a>
             </address>
             </header>
             <div class="w3-container">
@@ -67,6 +67,6 @@ with open('mapa-virtual.json', 'r', encoding='utf-8') as f:
         cidade_nome = cidade['nome']
         content = generateContent(cidade)
         pageHTML = preHTML.format(title=cidade_nome, cidade_nome=cidade_nome) + content + posHTML
-        f = open('./cidadesSite/' + cidade['id'] + '.html', 'w')
+        f = open('./cidadesSite/' + cidade['id'] + '.html', 'w', encoding='utf-8')
         f.write(pageHTML)
         f.close()
