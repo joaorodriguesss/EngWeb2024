@@ -70,7 +70,8 @@ http.createServer((req, res) => {
         })    
     }
     else if (req.url == '/animais'){
-        axios.get("http://localhost:3000/ocorrencias")
+        // PODEMOS COLAR A FRENTE DO GET AS QUERYS ?
+        axios.get("http://localhost:3000/ocorrencias?SpeciesIdDesc=DOG&GenderIDDesc=MALE&BreedIDesc=YORKSHIRE&20TERRIER&WhereBittenIDDesc=BODY&color=BLACK&color=BROWN")
             .then(resp => {
                 console.log(resp)
                 res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'})
